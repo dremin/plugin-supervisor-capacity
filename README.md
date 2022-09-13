@@ -110,19 +110,23 @@ Now open `src/config.js` in your text editor. Notice the runtime domain set to a
 ```javascript
 # Before:
 export default {
-    runtimeDomain: "http://localhost:3000"
+    runtimeDomain: "http://localhost:3000",
+    filterChannels: false
 }
 
 # After:
 export default {
-    runtimeDomain: "https://foobar-xxx-dev.twilio.io"
+    runtimeDomain: "https://foobar-xxx-dev.twilio.io",
+    filterChannels: false
 }
 
 ```
 
+You may also set `filterChannels` to `true` if you would like to limit which channels can be configured, as well as their valid ranges.
+
 #### UI configuration
 
-You can optionally configure the UI to only show certain task channels, and limit the valid range for each channel, by updating the Flex UI configuration:
+If `filterChannels` was set to `true` in `config.js`, you must configure which task channels appear in the UI, and the valid range for each channel, by updating the Flex UI configuration:
 
 ```
 POST https://flex-api.twilio.com/v1/Configuration

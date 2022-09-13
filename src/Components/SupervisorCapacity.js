@@ -35,7 +35,8 @@ export default class SupervisorCapacity extends React.Component {
     this.state = {
       workerChannels: [],
       changed: false,
-      loading: true
+      loading: true,
+      missingConfig: false
     };
 
     // We want each WorkerChannel subcomponent to handle its own state, but we
@@ -151,28 +152,37 @@ export default class SupervisorCapacity extends React.Component {
       }
 
       // Give us a blanks slate to work from
-      await this.setState({ workerChannels: [] }); // Empty out the workerChannels
+      await this.setState({ workerChannels: [], missingConfig: false }); // Empty out the workerChannels
       this.workerChannelChanges = {}; // Empty out workerChannelChanges
       this.updateChanged(); // Set our changed state based on the above
       
-      // get configuration from ui_attributes
-      const { channel_capacity } = Manager.getInstance().serviceConfiguration.ui_attributes;
-      let filteredChannels = response.data.workerChannels;
+      let filteredChannels = [];
       
-      if (channel_capacity) {
-        filteredChannels = response.data.workerChannels.filter(channel => {
-          if (channel_capacity[channel.taskChannelUniqueName]) {
-            return true;
-          }
-          return false;
-        })
-        .map(channel => {
-          return {
-            ...channel,
-            minCustomCapacity: channel_capacity[channel.taskChannelUniqueName].min,
-            maxCustomCapacity: channel_capacity[channel.taskChannelUniqueName].max
-          }
-        });
+      if (this.props.filterChannels) {
+        // get configuration from ui_attributes
+        const { channel_capacity } = Manager.getInstance().serviceConfiguration.ui_attributes;
+        
+        if (channel_capacity) {
+          // filter channels to only those configured
+          filteredChannels = response.data.workerChannels.filter(channel => {
+            if (channel_capacity[channel.taskChannelUniqueName]) {
+              return true;
+            }
+            return false;
+          })
+          .map(channel => {
+            // add config properties to each channel
+            return {
+              ...channel,
+              minCustomCapacity: channel_capacity[channel.taskChannelUniqueName].min,
+              maxCustomCapacity: channel_capacity[channel.taskChannelUniqueName].max
+            }
+          });
+        } else {
+          this.setState({ missingConfig: true });
+        }
+      } else {
+        filteredChannels = response.data.workerChannels;
       }
       
       await this.setState({ workerChannels: filteredChannels }); // Store our new WorkerChannels
@@ -250,6 +260,15 @@ export default class SupervisorCapacity extends React.Component {
         </SectionHeader>
         <WorkerChannelsContainer>
           <span className = "pulsate" > ...loading </span>
+        </WorkerChannelsContainer>
+      </Container>
+    } else if (this.state.missingConfig) {
+      return <Container>
+        <SectionHeader>
+          Channel Capacity
+        </SectionHeader>
+        <WorkerChannelsContainer>
+          Missing configuration. Please notify your system administrator.
         </WorkerChannelsContainer>
       </Container>
     } else {

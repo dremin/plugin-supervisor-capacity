@@ -32,6 +32,7 @@ export default class Plugin extends FlexPlugin {
 
     flex.WorkerCanvas.Content.add( < SupervisorCapacity key = "supervisor-capacity"
       runtimeDomain = { PluginConfig.runtimeDomain }
+      filterChannels = { PluginConfig.filterChannels }
       token = { getToken }
       />)
 
