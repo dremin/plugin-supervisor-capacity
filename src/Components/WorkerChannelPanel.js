@@ -79,14 +79,21 @@ export default class WorkerChannelPanel extends React.Component {
    * @param  {event} event - the UI event
    */
   onCapacityBlur(event) {
+    
+    let min = this.state.workerChannel.minCustomCapacity;
+    let max = this.state.workerChannel.maxCustomCapacity;
+    
+    if (!min) min = 0;
+    if (!max) max = 50;
+    
     if (
       event.target.value === "" ||
       event.target.value === null ||
-      event.target.value < 0
+      event.target.value < min
     ) {
-      this.handleChange(0); // min value = 0
-    } else if (event.target.value > 50) {
-      this.handleChange(50); // max value = 50
+      this.handleChange(min);
+    } else if (event.target.value > max) {
+      this.handleChange(max);
     }
   }
 

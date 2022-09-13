@@ -3,6 +3,8 @@ import React from 'react';
 import Url from 'url'
 import Axios from 'axios';
 
+import {Manager} from '@twilio/flex-ui';
+
 import {Button} from '@twilio-paste/core/button';
 import {Flex} from '@twilio-paste/core/flex';
 import {Stack} from '@twilio-paste/core/stack';
@@ -152,8 +154,28 @@ export default class SupervisorCapacity extends React.Component {
       await this.setState({ workerChannels: [] }); // Empty out the workerChannels
       this.workerChannelChanges = {}; // Empty out workerChannelChanges
       this.updateChanged(); // Set our changed state based on the above
-
-      await this.setState({ workerChannels: response.data.workerChannels }); // Store our new WorkerChannels
+      
+      // get configuration from ui_attributes
+      const { channel_capacity } = Manager.getInstance().serviceConfiguration.ui_attributes;
+      let filteredChannels = response.data.workerChannels;
+      
+      if (channel_capacity) {
+        filteredChannels = response.data.workerChannels.filter(channel => {
+          if (channel_capacity[channel.taskChannelUniqueName]) {
+            return true;
+          }
+          return false;
+        })
+        .map(channel => {
+          return {
+            ...channel,
+            minCustomCapacity: channel_capacity[channel.taskChannelUniqueName].min,
+            maxCustomCapacity: channel_capacity[channel.taskChannelUniqueName].max
+          }
+        });
+      }
+      
+      await this.setState({ workerChannels: filteredChannels }); // Store our new WorkerChannels
 
 
     } catch (e) {

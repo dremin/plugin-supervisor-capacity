@@ -120,6 +120,33 @@ export default {
 
 ```
 
+#### UI configuration
+
+You can optionally configure the UI to only show certain task channels, and limit the valid range for each channel, by updating the Flex UI configuration:
+
+```
+POST https://flex-api.twilio.com/v1/Configuration
+Authorization: Basic {base64-encoded Twilio Account SID : Auth Token}
+Content-Type: application/json
+
+{
+  "account_sid": "Enter your Twilio Account SID here",
+  "ui_attributes": {
+    ... include your existing ui_attributes here ...
+    "channel_capacity": {
+      "voice": {
+        "min": 0,
+        "max": 1
+      },
+      "chat": {
+        "min": 0,
+        "max": 10
+      }
+    }
+  }
+}
+```
+
 And now your plugin is fully configured! You can now run it locally to test and customize it, or build it into a package and upload it to your Twilio Assets for hosted use.
 
 ## Local Development/Deployment
